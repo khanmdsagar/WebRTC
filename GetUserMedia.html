@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Getting user media</title>
+    <style>
+        body{
+            background-color: #252525;
+        }
+        img{
+            border-radius: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <img>
+    <video width="640px" height="480px"></video>
+
+    <script>
+        var imageCapture
+        var img = document.querySelector('img')
+
+        setInterval(takePhoto, 140)
+
+        navigator.mediaDevices.enumerateDevices()
+            .then((devices)=>{
+                devices.filter((device)=>{
+                    if(!device.kind == 'audioinput') alert('Microphone not available')
+                    if(!device.kind == 'videoinput') alert('Camera not available')
+                    if(!device.kind == 'audiooutput') alert('Speaker not available')
+                })
+            })
+
+        function takePhoto() {
+            navigator.mediaDevices.getUserMedia({video: true})
+                .then(function(stream){
+                    imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
+                    imageCapture.takePhoto()
+                        .then(function(blob) {
+                            //img.src = URL.createObjectURL(blob)
+                            var reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onloadend = function () {
+                                var base64String = reader.result;
+                                img.src = base64String
+                            }
+                        })
+                })
+        }
+
+        //screen capture
+        navigator.mediaDevices.getDisplayMedia({video: true})
+            .then((displayStream)=>{
+                var video = document.querySelector('video')
+                video.srcObject = displayStream
+                video.play()
+            })
+
+    </script>
+</body>
+</html>
